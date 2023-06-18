@@ -156,6 +156,31 @@ class ApacheLogParserTestCase(unittest.TestCase):
         for k,v in expected_data.items():
             self.assertEqual(log_data[k], v)
 
+    def test_http3(self):
+        line_parser = apache_log_parser.make_parser("%h %l %u %t \"%r\" %>s %O \"%{Referer}i\" \"%{User-Agent}i\"")
+        sample = '''137.226.113.25 - - [31/Dec/2017:03:14:19 +0100] "GET / HTTP/3.0" 200 0 "-" "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:50.0) Gecko/20100101 Firefox/50.0"'''
+        log_data = line_parser(sample)
+        expected_data = {'bytes_tx': '0',
+                         'remote_host': '137.226.113.25',
+                         'remote_logname': '-',
+                         'remote_user': '-',
+                         'request_first_line': 'GET / HTTP/3.0',
+                         'request_header_referer': '-',
+                         'request_header_user_agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; '
+                                                      'rv:50.0) Gecko/20100101 Firefox/50.0',
+                         'request_header_user_agent__browser__family': 'Firefox',
+                         'request_header_user_agent__browser__version_string': '50.0',
+                         'request_header_user_agent__is_mobile': False,
+                         'request_header_user_agent__os__family': 'Ubuntu',
+                         'request_header_user_agent__os__version_string': '',
+                         'request_http_ver': '3.0',
+                         'request_method': 'GET',
+                         'request_url': '/',
+                         'status': '200',
+                         'time_received': '[31/Dec/2017:03:14:19 +0100]'}
+        for k,v in expected_data.items():
+            self.assertEqual(log_data[k], v)
+
     def test_doctest_readme(self):
         doctest.testfile("../README.md")
 
